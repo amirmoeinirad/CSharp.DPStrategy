@@ -1,58 +1,47 @@
-﻿
 // Amir Moeini Rad
-// September 2025
+// December, 2025
 
-// Main Concept: Strategy Design Pattern
-// In this pattern, we define a family of algorithms, encapsulate each one, and make them interchangeable.
-// Strategy lets the algorithm vary independently from clients that use it.
+// Main Concept: The Strategy Design Pattern
 
+// In this pattern, we define a family of algorithms, encapsulate each one in a class,
+// and make them interchangeable.
 
-namespace StrategyDP
+namespace DPStrategy
 {
     // Strategy interface
-    interface IStrategy
+    public interface IDiscountStrategy
     {
-        void Execute();
+        decimal ApplyDiscount(decimal price);
+    }
+    
+
+    // Concrete strategies
+    public class NoDiscount : IDiscountStrategy
+    {
+        public decimal ApplyDiscount(decimal price) => price;
     }
 
-
-    // Concrete Strategies
-    class StrategyA : IStrategy
+    public class PercentageDiscount : IDiscountStrategy
     {
-        public void Execute() => Console.WriteLine("Executing Strategy A.");
+        public decimal ApplyDiscount(decimal price) => price * 0.9m; // 10% off
     }
+    
 
-
-    class StrategyB : IStrategy
+    // Context class
+    public class ShoppingCart
     {
-        public void Execute() => Console.WriteLine("Executing Strategy B.");
-    }
+        private readonly IDiscountStrategy _strategy;
 
-
-    ////////////////////////////////////////////////////
-
-
-    // Context
-    class Context
-    {
-        private IStrategy? _strategy;
-
-        // Set strategy at runtime
-        public void SetStrategy(IStrategy strategy) => _strategy = strategy;
-
-        public void DoWork()
+        public ShoppingCart(IDiscountStrategy strategy)
         {
-            if (_strategy != null)
-                _strategy.Execute();
-            else
-                Console.WriteLine("No strategy set.");
+            _strategy = strategy;
         }
+
+        public decimal Checkout(decimal price) => _strategy.ApplyDiscount(price);
     }
-
-    
-    ////////////////////////////////////////////////////
     
 
+    // Client
     internal class Program
     {
         static void Main(string[] args)
@@ -61,17 +50,18 @@ namespace StrategyDP
             Console.WriteLine("The Strategy Design Pattern in C#.NET.");
             Console.WriteLine("--------------------------------------\n");
 
+            decimal price = 100;
+            Console.WriteLine($"Original Price: {price}");
 
-            Context context = new Context();
+            IDiscountStrategy discountStrategy = new NoDiscount();            
+            var cart = new ShoppingCart(discountStrategy);
+            decimal finalPrice = cart.Checkout(price);
+            Console.WriteLine($"Final Price: {finalPrice}");
 
-            // Use Strategy A
-            context.SetStrategy(new StrategyA());
-            context.DoWork();
-
-            // Switch to Strategy B at runtime
-            context.SetStrategy(new StrategyB());
-            context.DoWork();
-
+            discountStrategy = new PercentageDiscount();
+            cart = new ShoppingCart(discountStrategy);
+            finalPrice = cart.Checkout(price);
+            Console.WriteLine($"Final Price: {finalPrice}");
 
             Console.WriteLine("\nDone.");
         }
